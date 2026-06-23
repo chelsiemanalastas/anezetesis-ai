@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "llms": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
