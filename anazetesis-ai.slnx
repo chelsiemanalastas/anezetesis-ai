@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Anazetesis.Api/Anazetesis.Api.csproj" Id="3438183e-6e78-451c-8809-5239b20f0208" />
+    <Project Path="src/Anazetesis.Core/Anazetesis.Core.csproj" Id="b7400949-988b-4a16-8259-ab39f0d49ac0" />
+    <Project Path="src/Anazetesis.Infrastructure/Anazetesis.Infrastructure.csproj" Id="dfc18cfc-aebc-4a67-bea4-48097ba82777" />
     <Project Path="src/llms/llms.csproj" Id="241004fa-f619-41f1-b108-dfdbd2b27a3a" />
   </Folder>
 </Solution>

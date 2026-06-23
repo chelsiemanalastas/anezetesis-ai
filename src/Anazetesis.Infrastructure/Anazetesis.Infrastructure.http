@@ -1,0 +1,6 @@
+@Anazetesis.Infrastructure_HostAddress = http://localhost:5122
+
+GET {{Anazetesis.Infrastructure_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
