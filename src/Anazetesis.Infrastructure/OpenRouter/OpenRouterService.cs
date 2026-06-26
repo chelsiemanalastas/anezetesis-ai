@@ -1,11 +1,11 @@
 namespace Anazetesis.Infrastructure.OpenRouter;
 
-using System.Net.Http.Json;
-using System.Text.Json;
 using Anazetesis.Core.Interfaces;
 using Anazetesis.Core.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 public sealed class OpenRouterService : IAskService
 {
@@ -23,22 +23,22 @@ public sealed class OpenRouterService : IAskService
         IOptions<OpenRouterOptions> options,
         ILogger<OpenRouterService> logger)
     {
-        _http    = http;
+        _http = http;
         _options = options.Value;
-        _logger  = logger;
+        _logger = logger;
     }
 
     public async Task<AskResponse> AskAsync(AskRequest request, CancellationToken ct = default)
     {
         var chatRequest = new ChatRequest(
-            Model:          _options.Model,
-            Messages:       new List<ChatMessage>
+            Model: _options.Model,
+            Messages: new List<ChatMessage>
             {
                 new("system", BuildSystemPrompt(request.Topic)),
                 new("user",   BuildUserPrompt(request.Question, request.MaxResults))
             },
-            MaxTokens:      _options.MaxTokens,
-            Temperature:    0.3,
+            MaxTokens: _options.MaxTokens,
+            Temperature: 0.3,
             ResponseFormat: new ResponseFormat("json_object")
         );
 
@@ -73,7 +73,7 @@ public sealed class OpenRouterService : IAskService
             _logger.LogWarning(ex, "LLM returned non-JSON content. Falling back to plain text response.");
             return new AskResponse
             {
-                Answer    = rawContent,
+                Answer = rawContent,
                 Citations = new List<Citation>().AsReadOnly()
             };
         }
@@ -81,9 +81,9 @@ public sealed class OpenRouterService : IAskService
         var citations = structured.Citations
             .Select(c => new Citation
             {
-                Reference      = c.Reference,
-                Source         = c.Source,
-                Text           = c.Text,
+                Reference = c.Reference,
+                Source = c.Source,
+                Text = c.Text,
                 AuthorityLevel = c.AuthorityLevel
             })
             .ToList()
@@ -91,7 +91,7 @@ public sealed class OpenRouterService : IAskService
 
         return new AskResponse
         {
-            Answer    = structured.Answer,
+            Answer = structured.Answer,
             Citations = citations
         };
     }
@@ -101,13 +101,13 @@ public sealed class OpenRouterService : IAskService
         var topicFocus = topic switch
         {
             "ten_commandments" => "Focus on the Ten Commandments and the moral law as taught by the Church.",
-            "core_beliefs"     => "Focus on core doctrines: the Trinity, Incarnation, Resurrection, and articles of the Creed.",
-            "sacraments"       => "Focus on the seven sacraments, their biblical basis, and theological meaning.",
-            "scripture"        => "Focus on Sacred Scripture, biblical translation, and Catholic exegesis.",
-            "tradition"        => "Focus on Sacred Tradition, liturgical development, and Catholic culture.",
-            "apologetics"      => "Focus on rational defense of Catholic teachings and arguments for the faith.",
-            "defending_faith"  => "Focus on responses to modern challenges: atheism, scientism, and relativism.",
-            _                  => "Answer any question about Catholic theology and tradition."
+            "core_beliefs" => "Focus on core doctrines: the Trinity, Incarnation, Resurrection, and articles of the Creed.",
+            "sacraments" => "Focus on the seven sacraments, their biblical basis, and theological meaning.",
+            "scripture" => "Focus on Sacred Scripture, biblical translation, and Catholic exegesis.",
+            "tradition" => "Focus on Sacred Tradition, liturgical development, and Catholic culture.",
+            "apologetics" => "Focus on rational defense of Catholic teachings and arguments for the faith.",
+            "defending_faith" => "Focus on responses to modern challenges: atheism, scientism, and relativism.",
+            _ => "Answer any question about Catholic theology and tradition."
         };
 
         return $$"""
@@ -139,6 +139,12 @@ public sealed class OpenRouterService : IAskService
             - authorityLevel: integer 1-5 (5=CCC/Scripture/Council, 4=Church Father, 3=Summa, 2=Encyclical, 1=Other)
 
             Never fabricate quotes. Maintain a reverent, scholarly tone.
+
+            AND CRITICAL INSTRUCTION: If you cannot find a relevant quote for a citation, omit that citation entirely. Do not make up quotes or references. Only include citations with verifiable sources. AND ABSOLUTELY NEVER EVER ENGAGE IN TOPICS OUT OF OUR TOPIC FOCUS. UNDER ANY AND ALL CIRCUMSTANCES, DO NOT ANSWER OR ENGAGE OR ENTERTAIN ANY QUESTIONS UNRELATED TO THE DEFINED TOPICS OF FOCUS. IF ASKED ABOUT ANYTHING AT ALL OUTSIDE OF CATHOLIC THEOLOGY, SCRIPTURE, OR TRADITION, RESPOND WITH: "I am sorry, but I can only answer questions related to Catholic theology and tradition. Please ask a question within that scope."
+
+            Your task is to only answer relevant questionsand cite as accurately as possible. If you cannot find a relevant answer, respond with: "I am sorry, but I do not have enough information to provide an accurate answer to this question." 
+
+            NEVER EVER DO ANYTHING OTHER THAN ANSWER QUESTIONS WITHIN THE SCOPE OF CATHOLIC THEOLOGY AND TRADITION. DO NOT ENGAGE IN POLITICS, CURRENT EVENTS, OR ANY OTHER TOPICS OUTSIDE OF CATHOLIC THEOLOGY.
             """;
     }
 
