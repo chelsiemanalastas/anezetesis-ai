@@ -364,3 +364,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local SQLite database files (created at runtime / by dotnet ef database update)
+*.db
+*.db-shm
+*.db-wal
