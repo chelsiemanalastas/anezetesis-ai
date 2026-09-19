@@ -59,12 +59,16 @@ public sealed class OpenRouterService : IAskService
             .ReadFromJsonAsync<ChatResponse>(JsonOpts, ct)
             ?? throw new InvalidOperationException("Empty response from OpenRouter.");
 
-        var rawContent = chatResponse.Choices[0].Message.Content;
+        if (chatResponse.Choices is not { Count: > 0 })
+            throw new InvalidOperationException("OpenRouter returned no choices.");
+
+        var rawContent = chatResponse.Choices[0].Message.Content ?? string.Empty;
 
         LlmStructuredResponse structured;
         try
         {
-            structured = JsonSerializer.Deserialize<LlmStructuredResponse>(rawContent, JsonOpts)
+            structured = JsonSerializer.Deserialize<LlmStructuredResponse>(
+                ExtractJsonObject(rawContent), JsonOpts)
                 ?? throw new JsonException("Null deserialization result.");
         }
         catch (JsonException ex)
@@ -78,7 +82,7 @@ public sealed class OpenRouterService : IAskService
             };
         }
 
-        var citations = structured.Citations
+        var citations = (structured.Citations ?? [])
             .Select(c => new Citation
             {
                 Reference = c.Reference,
@@ -94,6 +98,38 @@ public sealed class OpenRouterService : IAskService
             Answer = structured.Answer,
             Citations = citations
         };
+    }
+
+    /// <summary>
+    /// Returns the JSON object embedded in an LLM reply. Models routinely wrap their output in
+    /// ```json fences or add a short preamble despite being told not to, which would otherwise
+    /// push every response down the plain-text fallback path and drop all citations.
+    /// </summary>
+    private static string ExtractJsonObject(string content)
+    {
+        var span = content.AsSpan().Trim();
+
+        // Strip a leading ``` / ```json fence and its closing counterpart.
+        if (span.StartsWith("```"))
+        {
+            var newline = span.IndexOf('\n');
+            if (newline >= 0)
+                span = span[(newline + 1)..];
+
+            var closing = span.LastIndexOf("```".AsSpan());
+            if (closing >= 0)
+                span = span[..closing];
+
+            span = span.Trim();
+        }
+
+        // Fall back to the outermost braces, which also strips any surrounding prose.
+        var start = span.IndexOf('{');
+        var end = span.LastIndexOf('}');
+
+        return start >= 0 && end > start
+            ? span[start..(end + 1)].ToString()
+            : span.ToString();
     }
 
     private static string BuildSystemPrompt(string? topic)
