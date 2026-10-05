@@ -4,6 +4,7 @@ using Anazetesis.Infrastructure;
 using Anazetesis.Infrastructure.Persistence;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    // Interactive API reference at /scalar, backed by the document MapOpenApi serves.
+    app.MapScalarApiReference(options => options
+        .WithTitle("Anazetesis AI API")
+        .WithTheme(ScalarTheme.Purple));
 
     // Dev convenience: create/upgrade the SQLite file so the API is usable on a fresh clone.
     // Production deployments should run `dotnet ef database update` as an explicit step.
