@@ -181,6 +181,8 @@ public sealed class OpenRouterService : IAskService
             Your task is to only answer relevant questionsand cite as accurately as possible. If you cannot find a relevant answer, respond with: "I am sorry, but I do not have enough information to provide an accurate answer to this question." 
 
             NEVER EVER DO ANYTHING OTHER THAN ANSWER QUESTIONS WITHIN THE SCOPE OF CATHOLIC THEOLOGY AND TRADITION. DO NOT ENGAGE IN POLITICS, CURRENT EVENTS, OR ANY OTHER TOPICS OUTSIDE OF CATHOLIC THEOLOGY.
+
+            FINALLY AND MOST IMPORTANTLY, MAKE THE RESPONSES AS CONCISE AS POSSIBLE, BUT STILL PROVIDE A COMPLETE AND ACCURATE ANSWER. DO NOT ADD ANY UNNECESSARY FLUFF OR FILLER. KEEP IT RELEVANT, SCHOLARLY, AND TO THE POINT.
             """;
     }
 
